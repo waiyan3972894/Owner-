@@ -3,104 +3,106 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shop Admin Dashboard</title>
+    <title>Admin Panel - Full Features</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <style>
-        body { background: #121212; color: #eee; font-family: sans-serif; }
-        .card { background: #1e1e1e; border: 1px solid #333; }
-        .form-control, .form-select { background: #2c2c2c; color: white; border: 1px solid #444; }
-        .form-control:focus { background: #333; color: white; border-color: #0d6efd; box-shadow: none; }
-        .img-preview { width: 50px; height: 50px; object-fit: cover; border-radius: 4px; }
-        .table-dark { background-color: #1e1e1e; }
+        body { background: #0f172a; color: #e2e8f0; font-family: sans-serif; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; }
+        .form-control, .form-select { background: #334155; color: white; border: 1px solid #475569; }
+        .form-control:focus { background: #334155; color: white; border-color: #38bdf8; box-shadow: none; }
+        .table { color: #cbd5e1; vertical-align: middle; }
+        .img-preview { width: 45px; height: 45px; object-fit: cover; border-radius: 5px; }
+        .section-title { border-left: 4px solid #38bdf8; padding-left: 10px; margin-bottom: 15px; font-weight: bold; }
     </style>
 </head>
-<body>
-    <div class="container py-4">
-        <h3 class="mb-4 text-primary">🛠️ Game Shop Admin Panel</h3>
+<body class="container py-4">
+    <h3 class="text-info fw-bold mb-4 text-center">🛠️ Shop Admin Panel</h3>
 
-        <div class="card mb-5 shadow">
-            <div class="card-header bg-primary text-white">Post အသစ်တင်ရန်</div>
-            <div class="card-body">
-                <form id="addForm">
-                    <div class="row g-3">
-                        <div class="col-md-6">
-                            <label class="small text-muted">ပစ္စည်းအမည်</label>
-                            <input type="text" id="itemName" class="form-control" placeholder="Item Name" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small text-muted">ဈေးနှုန်း (Ks)</label>
-                            <input type="number" id="itemPrice" class="form-control" placeholder="Price" required>
-                        </div>
-                        <div class="col-md-3">
-                            <label class="small text-muted">အမျိုးအစား</label>
-                            <select id="itemCategory" class="form-select">
-                                <option value="Dia">Dia</option>
-                                <option value="Robux">Robux</option>
-                                <option value="Blox Fruit">Blox Fruit</option>
-                            </select>
-                        </div>
-                        <div class="col-12">
-                            <label class="form-label small text-info">ပုံ Link များ (တစ်ကြောင်းချင်းစီ Paste ချပါ)</label>
-                            <textarea id="itemImageUrls" class="form-control" rows="4" placeholder="https://link1.jpg&#10;https://link2.jpg" required></textarea>
-                        </div>
-                        <div class="col-12">
-                            <label class="small text-muted">အသေးစိတ်အချက်အလက် (Description)</label>
-                            <textarea id="itemDesc" class="form-control" rows="3" placeholder="အသေးစိတ်အချက်အလက်များ..."></textarea>
-                        </div>
-                        <div class="col-12 text-end">
-                            <button type="submit" class="btn btn-success px-5 fw-bold">Publish Post</button>
-                        </div>
-                    </div>
-                </form>
-            </div>
+    <div class="card p-3 mb-4 border-info shadow-sm">
+        <h6 class="text-info fw-bold mb-3">💰 Wallet Top-up (ငွေဖြည့်ရန်)</h6>
+        <div class="row g-2">
+            <div class="col-md-5"><input type="text" id="topupUid" class="form-control" placeholder="User UID"></div>
+            <div class="col-md-4"><input type="number" id="topupAmount" class="form-control" placeholder="ပမာဏ (Ks)"></div>
+            <div class="col-md-3"><button id="topupBtn" class="btn btn-info w-100 fw-bold">Confirm</button></div>
         </div>
+    </div>
 
-        <h5 class="mb-3">📦 လက်ရှိတင်ထားသော ပစ္စည်းများ</h5>
+    <div class="section-title text-success">UPLOAD NEW PRODUCT</div>
+    <div class="card p-3 mb-4 border-success shadow-sm">
+        <form id="addForm" class="row g-3">
+            <div class="col-md-4">
+                <label class="small text-success">ပစ္စည်းအမည်</label>
+                <input type="text" id="itemName" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label class="small text-warning">နဂိုဈေး (Original Price)</label>
+                <input type="number" id="itemOriginalPrice" class="form-control" placeholder="0">
+            </div>
+            <div class="col-md-2">
+                <label class="small text-success">ရောင်းဈေး (Sale Price)</label>
+                <input type="number" id="itemPrice" class="form-control" required>
+            </div>
+            <div class="col-md-2">
+                <label class="small text-info">Stock အရေအတွက်</label>
+                <input type="number" id="itemStock" class="form-control" value="10" required>
+            </div>
+            <div class="col-md-2">
+                <label class="small text-success">အမျိုးအစား</label>
+                <select id="itemCategory" class="form-select">
+                    <option value="Dia">Dia</option>
+                    <option value="Robux">Robux</option>
+                    <option value="Blox Fruit">Blox Fruit</option>
+                </select>
+            </div>
+            <div class="col-md-12">
+                <label class="small text-success">ပုံ Link များ (တစ်ကြောင်းလျှင် တစ်ခု)</label>
+                <textarea id="itemImageUrls" class="form-control" rows="1"></textarea>
+            </div>
+            <div class="col-12 text-end">
+                <button type="submit" class="btn btn-success px-5 fw-bold">Publish Item</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="section-title text-warning">MANAGE PRODUCTS</div>
+    <div class="card border-warning overflow-hidden">
         <div class="table-responsive">
-            <table class="table table-dark table-hover border-secondary">
+            <table class="table table-dark table-hover mb-0 text-center">
                 <thead>
                     <tr>
                         <th>ပုံ</th>
-                        <th>အမည်/အမျိုးအစား</th>
-                        <th>ဈေးနှုန်း</th>
-                        <th>အခြေအနေ</th>
-                        <th>လုပ်ဆောင်ချက်</th>
+                        <th>အမည်</th>
+                        <th>ဈေးနှုန်း (Discount)</th>
+                        <th>Stock</th>
+                        <th>Status</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="adminTableBody">
-                    </tbody>
+                <tbody id="adminTableBody"></tbody>
             </table>
         </div>
     </div>
 
     <div class="modal fade" id="editModal" tabindex="-1">
-        <div class="modal-dialog text-dark">
-            <div class="modal-content shadow-lg">
-                <div class="modal-header bg-primary text-white">
-                    <h5 class="modal-title">✏️ ပစ္စည်းအချက်အလက် ပြင်ဆင်ရန်</h5>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-                </div>
+        <div class="modal-dialog modal-lg text-dark">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white"><h5>Edit Product</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div>
                 <div class="modal-body">
                     <input type="hidden" id="editId">
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">ပစ္စည်းအမည်</label>
-                        <input type="text" id="editName" class="form-control text-dark bg-light border">
+                    <div class="mb-3"><label>ပစ္စည်းအမည်</label><input type="text" id="editName" class="form-control"></div>
+                    <div class="row mb-3">
+                        <div class="col"><label>နဂိုဈေး</label><input type="number" id="editOriginalPrice" class="form-control"></div>
+                        <div class="col"><label>ရောင်းဈေး</label><input type="number" id="editPrice" class="form-control"></div>
+                        <div class="col"><label>Stock</label><input type="number" id="editStock" class="form-control"></div>
                     </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">ဈေးနှုန်း (Ks)</label>
-                        <input type="number" id="editPrice" class="form-control text-dark bg-light border">
-                    </div>
-                    <div class="mb-3">
-                        <label class="form-label fw-bold small">အသေးစိတ်အချက်အလက် (Description)</label>
-                        <textarea id="editDesc" class="form-control text-dark bg-light border" rows="5"></textarea>
-                    </div>
-                    <button id="saveEditBtn" class="btn btn-primary w-100 py-2 fw-bold">ပြင်ဆင်ချက်များ သိမ်းမည်</button>
+                    <button id="saveEditBtn" class="btn btn-primary w-100 fw-bold">Update Product</button>
                 </div>
             </div>
         </div>
     </div>
 
-    <script type="module" src="admin.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script type="module" src="admin.js"></script>
 </body>
 </html>
+

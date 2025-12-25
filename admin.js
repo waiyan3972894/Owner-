@@ -1,7 +1,6 @@
 import { initializeApp } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-app.js";
-import { getFirestore, collection, addDoc, deleteDoc, updateDoc, doc, onSnapshot, orderBy, query } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
+import { getFirestore, collection, addDoc, updateDoc, doc, onSnapshot, orderBy, query, increment, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/9.6.1/firebase-firestore.js";
 
-// ၁။ Firebase Config (သင့် Project မှ Config ကို ပြန်ထည့်ပါ)
 const firebaseConfig = {
     apiKey: "AIzaSyCRjqWvCQRjij73KVcKIdCdyNb5jjlLSK8",
     authDomain: "mlbbbf.firebaseapp.com",
@@ -10,105 +9,106 @@ const firebaseConfig = {
     messagingSenderId: "725278425000",
     appId: "1:725278425000:web:09e91633b10c6e85c9679d"
 };
-
 const app = initializeApp(firebaseConfig);
 const db = getFirestore(app);
 const productsCol = collection(db, "products");
 
-// ၂။ Post အသစ်တင်ခြင်း (Bulk Image Links & Description ပါဝင်သည်)
-document.getElementById('addForm').addEventListener('submit', async (e) => {
+// --- ၁။ ပစ္စည်းအသစ်တင်ခြင်း (Discount & Stock ပါဝင်သည်) ---
+document.getElementById('addForm').onsubmit = async (e) => {
     e.preventDefault();
-    const btn = e.target.querySelector('button');
-    btn.disabled = true;
-
-    const rawLinks = document.getElementById('itemImageUrls').value;
-    const imageUrlsArray = rawLinks.split('\n').map(link => link.trim()).filter(link => link !== "");
-
+    const urls = document.getElementById('itemImageUrls').value.split('\n').map(l => l.trim()).filter(l => l !== "");
     try {
         await addDoc(productsCol, {
             name: document.getElementById('itemName').value,
+            originalPrice: Number(document.getElementById('itemOriginalPrice').value) || 0,
             price: Number(document.getElementById('itemPrice').value),
+            stock: Number(document.getElementById('itemStock').value),
             category: document.getElementById('itemCategory').value,
-            desc: document.getElementById('itemDesc').value,
-            images: imageUrlsArray,
+            images: urls,
             isSoldOut: false,
             createdAt: Date.now()
         });
         alert("အောင်မြင်စွာ တင်ပြီးပါပြီ!");
         e.target.reset();
-    } catch (err) { alert("Error: " + err.message); }
-    btn.disabled = false;
-});
+    } catch (err) { alert(err.message); }
+};
 
-// ၃။ ပစ္စည်းစာရင်းပြသခြင်း
+// --- ၂။ ဇယားတွင် ပစ္စည်းများ ပြသခြင်း (Discount & Edit Button ပါဝင်သည်) ---
 onSnapshot(query(productsCol, orderBy("createdAt", "desc")), (snap) => {
     const tbody = document.getElementById('adminTableBody');
     tbody.innerHTML = "";
     snap.forEach(d => {
         const it = d.data();
-        const id = d.id;
-        
-        // JS Error မတက်စေရန် စာသားများကို ပြင်ဆင်ခြင်း
         const safeName = it.name.replace(/'/g, "\\'");
-        const safeDesc = (it.desc || "").replace(/'/g, "\\'").replace(/\n/g, "\\n");
-
+        
+        // Discount တွက်ချက်ပြသခြင်း
+        const discountText = it.originalPrice > it.price ?
+            `<span class="text-decoration-line-through text-muted small">${it.originalPrice}</span> ${it.price}` :
+            `${it.price}`;
+        
         tbody.innerHTML += `
         <tr>
             <td><img src="${it.images[0]}" class="img-preview"></td>
+            <td class="text-start small">${it.name}</td>
+            <td>${discountText} Ks</td>
+            <td>${it.stock}</td>
             <td>
-                <div>${it.name}</div>
-                <small class="badge bg-secondary">${it.category}</small>
-            </td>
-            <td>${it.price.toLocaleString()} Ks</td>
-            <td>
-                <button onclick="window.toggleS('${id}', ${it.isSoldOut})" class="btn btn-sm ${it.isSoldOut?'btn-danger':'btn-success'}">
-                    ${it.isSoldOut?'Sold Out':'Active'}
+                <button onclick="window.toggleS('${d.id}', ${it.isSoldOut})" 
+                    class="btn btn-sm ${it.isSoldOut ? 'btn-danger' : 'btn-success'} fw-bold" style="width: 80px;">
+                    ${it.isSoldOut ? 'Sold Out' : 'Active'}
                 </button>
             </td>
             <td>
-                <button onclick="window.openE('${id}', '${safeName}', ${it.price}, '${safeDesc}')" class="btn btn-primary btn-sm">Edit</button>
-                <button onclick="window.del('${id}')" class="btn btn-outline-danger btn-sm">Del</button>
+                <div class="d-flex gap-1 justify-content-center">
+                    <button onclick="window.openE('${d.id}', '${safeName}', ${it.price}, ${it.originalPrice || 0}, ${it.stock})" class="btn btn-primary btn-sm">Edit</button>
+                    <button onclick="window.del('${d.id}')" class="btn btn-outline-danger btn-sm">Del</button>
+                </div>
             </td>
         </tr>`;
     });
 });
 
-// ၄။ Edit Modal ဖွင့်ခြင်း (နဂို Description ပါ ပေါ်လာစေမည်)
-const editM = new bootstrap.Modal(document.getElementById('editModal'));
-
-window.openE = (id, name, price, desc) => {
+// --- ၃။ EDIT SYSTEM (ပြင်ဆင်ခြင်း) ---
+const editModal = new bootstrap.Modal(document.getElementById('editModal'));
+window.openE = (id, name, price, ogPrice, stock) => {
     document.getElementById('editId').value = id;
     document.getElementById('editName').value = name;
     document.getElementById('editPrice').value = price;
-    document.getElementById('editDesc').value = desc;
-    editM.show();
+    document.getElementById('editOriginalPrice').value = ogPrice;
+    document.getElementById('editStock').value = stock;
+    editModal.show();
 };
 
-// ၅။ ပြင်ဆင်ချက်များကို Update လုပ်ခြင်း
 document.getElementById('saveEditBtn').onclick = async () => {
     const id = document.getElementById('editId').value;
-    const btn = document.getElementById('saveEditBtn');
-    btn.disabled = true;
-
     try {
         await updateDoc(doc(db, "products", id), {
             name: document.getElementById('editName').value,
             price: Number(document.getElementById('editPrice').value),
-            desc: document.getElementById('editDesc').value
+            originalPrice: Number(document.getElementById('editOriginalPrice').value),
+            stock: Number(document.getElementById('editStock').value)
         });
+        editModal.hide();
         alert("ပြင်ဆင်ပြီးပါပြီ!");
-        editM.hide();
-    } catch (err) { alert("Error: " + err.message); }
-    
-    btn.disabled = false;
+    } catch (err) { alert(err.message); }
 };
 
-// ၆။ Sold Out / Active အခြေအနေပြောင်းခြင်း
-window.toggleS = async (id, s) => { 
-    await updateDoc(doc(db, "products", id), { isSoldOut: !s }); 
-};
+// --- ၄။ STATUS TOGGLE & DELETE & TOPUP ---
+window.toggleS = async (id, s) => { await updateDoc(doc(db, "products", id), { isSoldOut: !s }); };
+window.del = async (id) => { if (confirm("ဖျက်မှာ သေချာပါသလား?")) await deleteDoc(doc(db, "products", id)); };
 
-// ၇။ ပစ္စည်းဖျက်ခြင်း
-window.del = async (id) => { 
-    if(confirm("ဖျက်မှာ သေချာပါသလား?")) await deleteDoc(doc(db, "products", id)); 
-};
+document.getElementById('topupBtn').onclick = async () => {
+    const uid = document.getElementById('topupUid').value.trim();
+    const amt = Number(document.getElementById('topupAmount').value);
+    if (!uid || amt <= 0) return alert("Check inputs!");
+    try {
+        const userRef = doc(db, "users", uid);
+        const snap = await getDoc(userRef);
+        if (snap.exists()) {
+            await updateDoc(userRef, { balance: increment(amt) });
+            alert("ငွေဖြည့်သွင်းမှု အောင်မြင်ပါသည်!");
+            document.getElementById('topupAmount').value = "";
+        } else alert("User မရှိပါ။ UID မှန်အောင် ပြန်စစ်ပါ။");
+    } catch (e) { alert(e.message); }
+};    if(confirm("ဖျက်မှာ သေချာပါသလား?")) await deleteDoc(doc(db, "products", id)); 
+   
